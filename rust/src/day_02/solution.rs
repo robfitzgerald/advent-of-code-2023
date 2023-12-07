@@ -1,5 +1,7 @@
 use std::{collections::HashMap, str::FromStr};
 
+use crate::day::Day;
+
 #[derive(PartialEq, Eq, Hash)]
 pub enum Color {
     Red,
@@ -31,6 +33,13 @@ pub fn parse_draw(draw: &str) -> Result<(Color, u64), String> {
     Ok((color, count))
 }
 
+pub fn min(a: u64, b: u64) -> u64 {
+    if a < b {
+        a
+    } else {
+        b
+    }
+}
 pub fn max(a: u64, b: u64) -> u64 {
     if a < b {
         b
@@ -51,13 +60,19 @@ pub fn possible_game(rubric: &GameSet, test: &GameSet) -> bool {
 }
 
 impl GameSet {
-    pub fn max_reducer(&self, that: &GameSet) -> GameSet {
-        GameSet {
-            red: max(self.red, that.red),
-            green: max(self.green, that.green),
-            blue: max(self.blue, that.blue),
-        }
-    }
+    // pub fn max_reducer(&self, that: &GameSet) -> GameSet {
+    //     GameSet {
+    //         red: max(self.red, that.red),
+    //         green: max(self.green, that.green),
+    //         blue: max(self.blue, that.blue),
+    //     }
+    // }
+
+    const PROBLEM_1_CONSTRAINT: GameSet = GameSet {
+        red: 12,
+        green: 13,
+        blue: 14,
+    };
 }
 
 pub fn max_reducer(this: &GameSet, that: &GameSet) -> GameSet {
@@ -66,6 +81,25 @@ pub fn max_reducer(this: &GameSet, that: &GameSet) -> GameSet {
         green: max(this.green, that.green),
         blue: max(this.blue, that.blue),
     }
+}
+
+pub fn min_reducer(this: &GameSet, that: &GameSet) -> GameSet {
+    GameSet {
+        red: max(this.red, that.red),
+        green: max(this.green, that.green),
+        blue: max(this.blue, that.blue),
+    }
+}
+
+pub fn p1_collect(game_set: &GameSet, game_id: u64) -> Option<u64> {
+    let possible_game = possible_game(&GameSet::PROBLEM_1_CONSTRAINT, &game_set);
+    let result = if possible_game { Some(game_id) } else { None };
+    result
+}
+
+pub fn p2_collect(game_set: &GameSet, _game_id: u64) -> Option<u64> {
+    let power_of_set = game_set.red * game_set.green * game_set.blue;
+    Some(power_of_set)
 }
 
 impl FromStr for GameSet {
@@ -86,14 +120,12 @@ impl FromStr for GameSet {
     }
 }
 
-pub fn run_day_2_pt_1(puzzle_filename: &String) -> Result<String, String> {
-    let document = std::fs::read_to_string(puzzle_filename).map_err(|e| e.to_string())?;
-    let constraint = GameSet {
-        red: 12,
-        green: 13,
-        blue: 14,
-    };
-    let games_result = document
+pub fn solve(
+    document: String,
+    reducer: &dyn Fn(&GameSet, &GameSet) -> GameSet,
+    collector: &dyn Fn(&GameSet, u64) -> Option<u64>,
+) -> Result<Vec<Option<u64>>, String> {
+    document
         .lines()
         .map(|game| {
             let initial_split: Vec<&str> = game[5..].split(":").collect();
@@ -103,14 +135,25 @@ pub fn run_day_2_pt_1(puzzle_filename: &String) -> Result<String, String> {
                 .split(";")
                 .map(GameSet::from_str)
                 .collect::<Result<Vec<_>, String>>()?;
-            let max_game_set = game_sets
+            let reduced = game_sets
                 .iter()
-                .fold(GameSet::default(), |a, b| a.max_reducer(b));
-            let possible_game = possible_game(&constraint, &max_game_set);
-            let result = if possible_game { Some(game_id) } else { None };
+                .fold(GameSet::default(), |a, b| reducer(&a, b));
+            let result = collector(&reduced, game_id);
+            // let possible_game = possible_game(&constraint, &reduced);
+            // let result = if possible_game { Some(game_id) } else { None };
             Ok(result)
         })
-        .collect::<Result<Vec<_>, String>>()?;
+        .collect::<Result<Vec<_>, String>>()
+}
+
+pub fn run(puzzle_filename: &String, day: &Day) -> Result<String, String> {
+    let document = std::fs::read_to_string(puzzle_filename).map_err(|e| e.to_string())?;
+    let games_result = match day {
+        Day::Day2Part1 => solve(document, &max_reducer, &p1_collect)?,
+        Day::Day2Part2 => solve(document, &min_reducer, &p2_collect)?,
+        _ => Err(format!("unsupported day input {:?}", day))?,
+    };
+
     let sum: u64 = games_result.iter().flatten().sum();
     Ok(sum.to_string())
 }
