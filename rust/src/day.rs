@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use crate::{day_01, day_02, day_03};
+use crate::{day_01, day_02, day_03, day_04};
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
@@ -12,6 +12,8 @@ pub enum Day {
     Day2Part2,
     Day3Part1,
     Day3Part2,
+    Day4Part1,
+    Day4Part2,
 }
 
 impl Day {
@@ -23,6 +25,8 @@ impl Day {
             Day::Day2Part2 => day_02::solution::run(puzzle_filename, self),
             Day::Day3Part1 => day_03::solution::problem_01(puzzle_filename),
             Day::Day3Part2 => day_03::solution::problem_02(puzzle_filename),
+            Day::Day4Part1 => day_04::solution::problem_01(puzzle_filename),
+            Day::Day4Part2 => day_04::solution::problem_02(puzzle_filename),
         }
     }
 }
@@ -38,6 +42,8 @@ impl FromStr for Day {
             "day_2_part_2" => Ok(Day::Day2Part2),
             "day_3_part_1" => Ok(Day::Day3Part1),
             "day_3_part_2" => Ok(Day::Day3Part2),
+            "day_4_part_1" => Ok(Day::Day4Part1),
+            "day_4_part_2" => Ok(Day::Day4Part2),
             _ => Err(format!(
                 "unknown day {} should have format 'day_$day_part_$part'",
                 s
