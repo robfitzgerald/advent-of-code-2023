@@ -1,0 +1,1 @@
+g++ -I include src/aoc.cpp src/cli_util.cpp src/day_problem.cpp src/day_1.cpp -o build/aoc-cpp
