@@ -3,6 +3,8 @@
 #include <stdexcept>
 #include "day_1.h"
 #include "day_2.h"
+#include "day_3.h"
+#include "day_4.h"
 
 AocProblem get_aoc_problem(int day, int problem)
 {
@@ -22,6 +24,14 @@ int run(AocProblem problem, std::string filename)
     return day_2::problem_1(filename);
   case AocProblem::D2P2:
     return day_2::problem_2(filename);
+  case AocProblem::D3P1:
+    return day_3::problem_1(filename);
+  case AocProblem::D3P2:
+    return day_3::problem_2(filename);
+  case AocProblem::D4P1:
+    return day_4::problem_1(filename);
+  case AocProblem::D4P2:
+    return day_4::problem_2(filename);
   default:
     std::cerr << "problem has no solution implemented: " << problem << "." << std::endl;
     throw std::invalid_argument("unknown day/problem");

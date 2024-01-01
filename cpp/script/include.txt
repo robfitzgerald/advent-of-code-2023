@@ -1,0 +1,15 @@
+#ifndef DAY_$DAY
+#define DAY_$DAY
+
+namespace day_$DAY
+{
+  int problem_1(std::string filename);
+  int problem_2(std::string filename);
+}
+
+namespace day_$DAY_helper
+{
+
+}
+
+#endif
