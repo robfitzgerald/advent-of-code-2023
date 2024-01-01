@@ -11,20 +11,7 @@ namespace day_2
   {
     Set *cover_target = new Set(14, 12, 13);
 
-    std::ifstream input_file(filename);
-    if (!input_file.is_open())
-    {
-      std::cerr << "Error opening file" << filename << "." << std::endl;
-      throw;
-    }
-    std::string line;
-    std::vector<Game *> games;
-
-    while (std::getline(input_file, line))
-    {
-      Game *game = Game::from_string(line);
-      games.push_back(game);
-    }
+    std::vector<Game *> games = day_2_helper::get_games(filename);
 
     // std::cout << "games:" << std::endl;
     // for (Game *g : games)
@@ -46,7 +33,21 @@ namespace day_2
   }
   int problem_2(std::string filename)
   {
-    return -1;
+    std::vector<Game *> games = day_2_helper::get_games(filename);
+    std::vector<int> power_sets;
+    for (Game *game : games)
+    {
+      Set *min_set = game->min_game();
+      int power_set = min_set->power_set();
+      power_sets.push_back(power_set);
+    }
+
+    int sum = 0;
+    for (int num : power_sets)
+    {
+      sum += num;
+    }
+    return sum;
   }
 
   void Set::add(std::string color, int count)
@@ -137,10 +138,49 @@ namespace day_2
     }
     return result;
   }
+
+  Set *Game::min_game()
+  {
+    Set *min_set = new Set();
+    for (Set *set : this->sets_)
+    {
+      min_set->agg_min(set);
+    }
+    return min_set;
+  }
+
+  void Set::agg_min(Set *that)
+  {
+    this->blue_ = (this->blue_ < that->blue_) ? that->blue_ : this->blue_;
+    this->red_ = (this->red_ < that->red_) ? that->red_ : this->red_;
+    this->green_ = (this->green_ < that->green_) ? that->green_ : this->green_;
+  }
 }
 
 namespace day_2_helper
 {
+
+  std::vector<day_2::Game *> get_games(const std::string &filename)
+  {
+    using day_2::Game;
+    std::ifstream input_file(filename);
+    if (!input_file.is_open())
+    {
+      std::cerr << "Error opening file" << filename << "." << std::endl;
+      throw;
+    }
+    std::string line;
+    std::vector<Game *> games;
+
+    while (std::getline(input_file, line))
+    {
+      Game *game = Game::from_string(line);
+      games.push_back(game);
+    }
+
+    return games;
+  }
+
   std::vector<std::string> split(const std::string &target, char c)
   {
     std::string temp;
