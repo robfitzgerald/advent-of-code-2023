@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 namespace day_2
 {
@@ -14,8 +15,16 @@ namespace day_2
   class Set
   {
   public:
+    Set() : blue_(0), red_(0), green_(0) {}
     Set(int blue, int red, int green) : blue_(blue), red_(red), green_(green) {}
-    static Set from_string(std::string row);
+    void add(std::string, int);
+    static Set *from_string(std::string row);
+    bool covered_by(Set *);
+    inline friend std::ostream &operator<<(std::ostream &os, const Set &set)
+    {
+      os << "(B=" << set.blue_ << ", R=" << set.red_ << ", G=" << set.green_ << ")";
+      return os;
+    }
 
   private:
     int blue_;
@@ -26,13 +35,25 @@ namespace day_2
   class Game
   {
   public:
-    Game(int id, std::vector<Set> sets) : id_(id), sets_(sets) {}
-    Set aggregate(AggregateMethod);
-    static Game from_string(std::string);
+    int get_id() { return this->id_; }
+    Game(int id, std::vector<Set *> sets) : id_(id), sets_(sets) {}
+    // Set aggregate(AggregateMethod);
+    static Game *from_string(std::string);
+    bool covered_by(Set *);
+    inline friend std::ostream &operator<<(std::ostream &os, const Game &game)
+    {
+      os << "Game " << game.id_ << "<";
+      for (Set *set : game.sets_)
+      {
+        os << *set << " ";
+      }
+      os << ">";
+      return os;
+    }
 
   private:
     int id_;
-    std::vector<Set> sets_;
+    std::vector<Set *> sets_;
   };
 
   int problem_1(std::string filename);
@@ -41,7 +62,8 @@ namespace day_2
 
 namespace day_2_helper
 {
-
+  std::vector<std::string> split(const std::string &, char);
+  std::string trim(const std::string &);
 }
 
 #endif
